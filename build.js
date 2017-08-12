@@ -1,4 +1,22 @@
 "bundle";
+System.register('OpenGroup/development.grid.js', [], function (_export, _context) {
+    "use strict";
+
+    return {
+        setters: [],
+        execute: function () {
+            document.body.dataset.grid = localStorage.getItem('grid') || 'invisible';
+
+            document.addEventListener('keydown', function (event) {
+                if (event.ctrlKey && (event.keyCode === 59 || event.keyCode === 186)) {
+                    var newValue = document.body.dataset.grid === 'visible' ? 'invisible' : 'visible';
+                    document.body.dataset.grid = newValue;
+                    localStorage.setItem('grid', newValue);
+                }
+            });
+        }
+    };
+});
 System.registerDynamic("npm:vue-router@2.7.0.json", [], false, function() {
   return {
     "main": "dist/vue-router.common.js",
@@ -5190,7 +5208,7 @@ System.register('OpenGroup/core/managers/GroupManager.js', ['npm:systemjs-plugin
                     value: function getGroupBySlug(slug) {
                         return this.groups.filter(function (group) {
                             return group.slug === slug;
-                        })[0];
+                        })[0] || false;
                     }
                 }, {
                     key: 'getCurrentGroup',
@@ -5310,6 +5328,14 @@ System.register('OpenGroup/core/managers/MenuManager.js', ['npm:systemjs-plugin-
 
                         return submenu;
                     }
+                }, {
+                    key: 'getFirstMenuItemPath',
+                    value: function getFirstMenuItemPath(path) {
+                        var subMenu = this.getMenuItemByPath(path);
+                        if (subMenu && subMenu.children && subMenu.children[0]) {
+                            return subMenu.children[0].path;
+                        }
+                    }
                 }]);
 
                 return MenuManager;
@@ -5347,7 +5373,7 @@ System.register('OpenGroup/core/managers/ThemeManager.js', ['npm:systemjs-plugin
 
                     var _this = _possibleConstructorReturn(this, (ThemeManager.__proto__ || Object.getPrototypeOf(ThemeManager)).call(this));
 
-                    _this.componentNames = ['about', 'group-list', 'group-list-item', 'group-header', 'plugin-settings-form', 'nested-menu', 'sidebar', 'profile-teaser', 'profile', 'groups', 'group', 'add-group', 'group-settings'];
+                    _this.componentNames = ['about', 'group-list', 'group-list-item', 'group-header', 'plugin-settings-form', 'nested-menu', 'sidebar', 'profile-teaser', 'profile', 'group', 'groups', 'add-group', 'group-settings'];
                     _this.components = {};
 
                     _this.wrapper = wrapper;
@@ -5407,24 +5433,6 @@ System.register('OpenGroup/core/managers/ThemeManager.js', ['npm:systemjs-plugin
             _export('default', ThemeManager);
         }
     };
-});
-System.register("npm:systemjs-plugin-babel@0.0.17/babel-helpers/toConsumableArray.js", [], function (_export, _context) {
-  "use strict";
-
-  return {
-    setters: [],
-    execute: function () {
-      _export("default", function (arr) {
-        if (Array.isArray(arr)) {
-          for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
-            arr2[i] = arr[i];
-          }return arr2;
-        } else {
-          return Array.from(arr);
-        }
-      });
-    }
-  };
 });
 System.registerDynamic("npm:jspm-nodelibs-process@0.2.0.json", [], false, function() {
   return {
@@ -13398,15 +13406,13 @@ System.registerDynamic('npm:vue@2.1.8/dist/vue.common.js', ['process'], true, fu
   module.exports = Vue$3;
   return module.exports;
 });
-System.register('OpenGroup/core/managers/RouteManager.js', ['npm:systemjs-plugin-babel@0.0.17/babel-helpers/toConsumableArray.js', 'npm:systemjs-plugin-babel@0.0.17/babel-helpers/classCallCheck.js', 'npm:systemjs-plugin-babel@0.0.17/babel-helpers/createClass.js', 'npm:systemjs-plugin-babel@0.0.17/babel-helpers/possibleConstructorReturn.js', 'npm:systemjs-plugin-babel@0.0.17/babel-helpers/inherits.js', 'events', 'vue/dist/vue.common', 'underscore'], function (_export, _context) {
+System.register('OpenGroup/core/managers/RouteManager.js', ['npm:systemjs-plugin-babel@0.0.17/babel-helpers/classCallCheck.js', 'npm:systemjs-plugin-babel@0.0.17/babel-helpers/createClass.js', 'npm:systemjs-plugin-babel@0.0.17/babel-helpers/possibleConstructorReturn.js', 'npm:systemjs-plugin-babel@0.0.17/babel-helpers/inherits.js', 'events', 'vue/dist/vue.common', 'underscore'], function (_export, _context) {
     "use strict";
 
-    var _toConsumableArray, _classCallCheck, _createClass, _possibleConstructorReturn, _inherits, EventEmitter, Vue, _, RouteManager;
+    var _classCallCheck, _createClass, _possibleConstructorReturn, _inherits, EventEmitter, Vue, _, RouteManager;
 
     return {
-        setters: [function (_npmSystemjsPluginBabel0017BabelHelpersToConsumableArrayJs) {
-            _toConsumableArray = _npmSystemjsPluginBabel0017BabelHelpersToConsumableArrayJs.default;
-        }, function (_npmSystemjsPluginBabel0017BabelHelpersClassCallCheckJs) {
+        setters: [function (_npmSystemjsPluginBabel0017BabelHelpersClassCallCheckJs) {
             _classCallCheck = _npmSystemjsPluginBabel0017BabelHelpersClassCallCheckJs.default;
         }, function (_npmSystemjsPluginBabel0017BabelHelpersCreateClassJs) {
             _createClass = _npmSystemjsPluginBabel0017BabelHelpersCreateClassJs.default;
@@ -13431,6 +13437,20 @@ System.register('OpenGroup/core/managers/RouteManager.js', ['npm:systemjs-plugin
                     var _this = _possibleConstructorReturn(this, (RouteManager.__proto__ || Object.getPrototypeOf(RouteManager)).call(this));
 
                     _this.wrapper = wrapper;
+
+                    _this.wrapper.on('preReady', function () {
+                        _this.wrapper.router.afterEach(function (to, from) {
+                            if (to.name === 'groups.group' || to.name === 'groups.group.settings') {
+                                var firstMenuItemPath = _this.wrapper.menuManager.getFirstMenuItemPath(to.path);
+                                if (firstMenuItemPath) {
+                                    _this.wrapper.router.push(firstMenuItemPath);
+                                }
+                            }
+
+                            document.body.dataset.currentRoute = to.name;
+                            document.body.dataset.currentDepth = to.path.split('/').length - 1;
+                        });
+                    });
                     return _this;
                 }
 
@@ -13441,79 +13461,88 @@ System.register('OpenGroup/core/managers/RouteManager.js', ['npm:systemjs-plugin
                         var wrapper = this.wrapper;
 
                         return [{
+                            path: '/',
+                            redirect: '/groups'
+                        }, {
                             path: '/groups',
-                            alias: '/',
                             name: 'groups',
                             title: 'Groups',
-                            component: Vue.options.components['groups']
+                            component: Vue.options.components['groups'],
+                            children: [{
+                                path: ':slug',
+                                name: 'groups.group',
+                                title: 'Group',
+                                component: Vue.options.components['group'],
+                                beforeEnter: function beforeEnter(to, from, next) {
+                                    // Let's see if our group is ready, in other words,
+                                    // has loaded all the plugins and their components.
+                                    var checkState = function checkState() {
+                                        var currentGroup = wrapper.groupManager.getGroupBySlug(to.params.slug);
+                                        if (currentGroup && currentGroup.state === 'ready') {
+                                            return next();
+                                        }
+
+                                        setTimeout(checkState, 100);
+                                    };
+
+                                    checkState();
+                                },
+
+                                children: [{
+                                    path: 'settings',
+                                    name: 'groups.group.settings',
+                                    weight: -99,
+                                    title: 'Plugin',
+                                    component: Vue.options.components['group-settings']
+                                }, {
+                                    path: ':plugin',
+                                    name: 'groups.group.plugin',
+                                    title: 'Plugin',
+                                    component: {
+                                        template: '<component :is="componentName"></component>',
+                                        data: function data() {
+                                            var _this2 = this;
+
+                                            var currentGroup = wrapper.groupManager.getCurrentGroup();
+                                            var currentMenuItem = currentGroup.menuItems.filter(function (menuItem) {
+                                                return menuItem.subPath === _this2.$route.params.plugin;
+                                            })[0];
+
+                                            return {
+                                                componentName: currentMenuItem.component
+                                            };
+                                        }
+                                    }
+                                }, {
+                                    path: 'settings/:plugin',
+                                    name: 'groups.group.settings.plugin',
+                                    title: 'Plugin',
+                                    component: {
+                                        template: '\n                            <div>\n                                <h1 class="plugin-title">{{ title }}</h1>\n                                <vue-form-generator tag="div" :schema="schema" :model="model" :options="formOptions">\n                                </vue-form-generator>\n                                \n                                <div class="form-actions">\n                                    <div class="button primary" @click="save"><i class="fa fa-check" aria-hidden="true"></i> Save settings</div>\n                                </div>\n                            </div>',
+                                        watch: {
+                                            // This is needed else the whole form get's 'cached'.
+                                            '$route': function $route() {
+                                                Object.assign(this, routeManager.createSettingsRoute(this));
+                                            }
+                                        },
+                                        data: function data() {
+                                            return routeManager.createSettingsRoute(this);
+                                        },
+                                        methods: {
+                                            save: function save() {
+                                                this.plugin.saveSettings();
+                                                var currentGroup = wrapper.groupManager.getCurrentGroup();
+                                                wrapper.router.push('/groups/' + currentGroup.slug);
+                                            }
+                                        }
+                                    }
+                                }]
+                            }]
                         }, {
                             path: '/add-group',
-                            alias: '/',
                             name: 'add-group',
                             title: 'Add group',
                             component: Vue.options.components['add-group']
-                        }, {
-                            path: '/groups/:slug',
-                            name: 'groups.group',
-                            title: 'Group',
-                            component: Vue.options.components['group'],
-                            beforeEnter: function beforeEnter(to, from, next) {
-                                // Let's see if our group is ready, in other words,
-                                // has loaded all the plugins and their components.
-                                var checkState = function checkState() {
-                                    var currentGroup = wrapper.groupManager.getGroupBySlug(to.params.slug);
-                                    if (currentGroup && currentGroup.state === 'ready') {
-                                        return next();
-                                    }
-
-                                    setTimeout(checkState, 100);
-                                };
-
-                                checkState();
-                            },
-
-                            children: [{
-                                path: 'settings',
-                                name: 'groups.group.settings',
-                                weight: -99,
-                                title: 'Plugin',
-                                component: Vue.options.components['group-settings']
-                            }, {
-                                path: ':plugin',
-                                name: 'groups.group.plugin',
-                                title: 'Plugin',
-                                component: {
-                                    template: '<component :is="componentName"></component>',
-                                    data: function data() {
-                                        var _this2 = this;
-
-                                        var currentGroup = wrapper.groupManager.getCurrentGroup();
-                                        var currentMenuItem = currentGroup.menuItems.filter(function (menuItem) {
-                                            return menuItem.subPath === _this2.$route.params.plugin;
-                                        })[0];
-
-                                        return {
-                                            componentName: currentMenuItem.component
-                                        };
-                                    }
-                                }
-                            }, {
-                                path: 'settings/:plugin',
-                                name: 'groups.group.settings.plugin',
-                                title: 'Plugin',
-                                component: {
-                                    template: '\n                            <div>\n                                <h1>{{ title }}</h1>\n                                <vue-form-generator tag="div" :schema="schema" :model="model" :options="formOptions">\n                                </vue-form-generator>\n                            </div>',
-                                    watch: {
-                                        // This is needed else the whole form get's 'cached'.
-                                        '$route': function $route() {
-                                            Object.assign(this, routeManager.createSettingsRoute(this));
-                                        }
-                                    },
-                                    data: function data() {
-                                        return routeManager.createSettingsRoute(this);
-                                    }
-                                }
-                            }]
                         }, {
                             path: '/about',
                             name: 'about',
@@ -13536,17 +13565,11 @@ System.register('OpenGroup/core/managers/RouteManager.js', ['npm:systemjs-plugin
                             var settingsFormInfo = plugin.settingsForm();
 
                             return {
+                                plugin: plugin,
                                 title: settingsFormInfo.title,
                                 model: currentGroup.config.plugins[plugin.name],
                                 schema: {
-                                    fields: [].concat(_toConsumableArray(settingsFormInfo.schema), [{
-                                        type: 'submit',
-                                        onSubmit: function onSubmit() {
-                                            plugin.saveSettings();
-                                        },
-                                        validateBeforeSubmit: true,
-                                        buttonText: 'Save settings'
-                                    }])
+                                    fields: settingsFormInfo.schema
                                 },
                                 formOptions: {
                                     validateAfterLoad: true,
@@ -13823,12 +13846,12 @@ System.register('OpenGroup/core/Wrapper.js', ['npm:systemjs-plugin-babel@0.0.17/
         }
     };
 });
-System.register('OpenGroup/app.js', ['OpenGroup/core/Wrapper'], function (_export, _context) {
+System.register('OpenGroup/app.js', ['./development.grid.js', 'OpenGroup/core/Wrapper'], function (_export, _context) {
   "use strict";
 
   var Wrapper;
   return {
-    setters: [function (_OpenGroupCoreWrapper) {
+    setters: [function (_developmentGridJs) {}, function (_OpenGroupCoreWrapper) {
       Wrapper = _OpenGroupCoreWrapper.default;
     }],
     execute: function () {
@@ -43443,7 +43466,7 @@ System.register("OpenGroup/plugins/multichat/templates/multichat.html!npm:system
 
       _export("__useDefault", __useDefault);
 
-      _export("default", "<div class=\"multichat\">\n    <h1 class=\"plugin-title\">Chat</h1>\n\n    <div class=\"multichat-chats\">\n        <div class=\"multichat-chat\" v-for=\"message in messages\">\n            <div class=\"multichat-chat-message\" :class=\"{'self': message.self }\"><profile-teaser class=\"small\" :profile=\"getProfile(message.ownerUuid)\"></profile-teaser><span>{{ message.text }}</span></div>\n        </div>\n    </div>\n\n    <div class=\"multichat-footer\">\n        <textarea class=\"multichat-textarea\" rows=\"1\" placeholder=\"Your message\" v-on:keydown=\"sendChat($event)\" v-model=\"newMessage\"></textarea>\n        <div class=\"multichat-send button primary\" @click=\"sendChat()\"><i class=\"fa fa-paper-plane\" aria-hidden=\"true\"></i> Send message</div>\n    </div>\n</div>");
+      _export("default", "<div class=\"multichat\">\n    <h1 class=\"plugin-title\">Chat</h1>\n\n    <div class=\"multichat-chats\">\n        <div class=\"multichat-chat\" v-for=\"message in messages\">\n            <div class=\"multichat-chat-message\" :class=\"{'self': message.self }\"><profile-teaser class=\"small\" :profile=\"getProfile(message.ownerUuid)\"></profile-teaser><span>{{ message.text }}</span></div>\n        </div>\n    </div>\n\n    <div class=\"multichat-footer\">\n        <textarea class=\"multichat-textarea\" rows=\"1\" placeholder=\"Your message\" v-on:keydown=\"sendChat($event)\" v-model=\"newMessage\"></textarea>\n        <div class=\"multichat-send button primary\" @click=\"sendChat()\"><span>Send message</span><i class=\"fa fa-paper-plane\" aria-hidden=\"true\"></i></div>\n    </div>\n</div>");
     }
   };
 });
@@ -45445,8 +45468,8 @@ System.register('OpenGroup/plugins/og-signaler/plugin.js', ['npm:systemjs-plugin
                             schema: [{
                                 type: 'input',
                                 inputType: 'text',
-                                label: 'Server Websocket address',
-                                placeholder: 'Server Websocket address',
+                                label: 'Group URL',
+                                placeholder: 'connect.opengroup.io/my-group',
                                 model: 'url',
                                 required: true
                             }]
@@ -52559,10 +52582,12 @@ System.register('OpenGroup/theme/components/add-group.js', ['underscore', 'OpenG
             fields: [{
                 type: 'input',
                 inputType: 'text',
-                // label: 'Name',
                 model: 'name',
-                placeholder: 'What is the name of the group?',
+                label: 'What is the name of the group?',
                 required: true
+            }, {
+                type: "label",
+                label: "Plugins"
             }]
         };
 
@@ -52595,6 +52620,7 @@ System.register('OpenGroup/theme/components/add-group.js', ['underscore', 'OpenG
                 model: 'plugins.' + plugin.instance.name + '.enabled',
                 default: plugin.required,
                 disabled: plugin.required,
+                name: plugin.instance.name,
                 styleClasses: 'inline'
             });
 
@@ -52604,6 +52630,7 @@ System.register('OpenGroup/theme/components/add-group.js', ['underscore', 'OpenG
                     field.visible = function () {
                         return model.plugins[plugin.instance.name].enabled;
                     };
+                    field.styleClasses = 'inside-plugin';
                     field.model = 'plugins.' + plugin.instance.name + '.' + field.model;
                     schema.fields.push(field);
                 });
@@ -52674,9 +52701,12 @@ System.register('OpenGroup/theme/components/group-header.js', [], function (_exp
     _export('default', function (wrapper) {
         var dataGetter = function dataGetter() {
             var menuItems = [];
+            var menuItem = false;
 
             var currentGroup = wrapper.groupManager.getCurrentGroup();
-            var menuItem = wrapper.menuManager.getMenuItemByPath('/groups/' + currentGroup.slug);
+            if (currentGroup) {
+                menuItem = wrapper.menuManager.getMenuItemByPath('/groups/' + currentGroup.slug);
+            }
 
             if (menuItem && menuItem.children) {
                 menuItems = menuItem.children;
@@ -52684,20 +52714,30 @@ System.register('OpenGroup/theme/components/group-header.js', [], function (_exp
 
             return {
                 menu: menuItems,
-                group: wrapper.groupManager.getCurrentGroup()
+                group: currentGroup
             };
         };
 
         return {
             watch: {
                 '$route': function $route() {
-                    var refreshedData = dataGetter();
-                    this.menu = refreshedData.menu;
-                    this.group = refreshedData.group;
+                    var _this = this;
+
+                    Object.assign(this, dataGetter());
+                    setTimeout(function () {
+                        _this.showMenu = false;
+                    }, 300);
                 }
             },
             data: function data() {
-                return dataGetter();
+                var data = { showMenu: false };
+                Object.assign(data, dataGetter());
+                return data;
+            },
+            methods: {
+                toggleMenu: function toggleMenu() {
+                    this.showMenu = !this.showMenu;
+                }
             }
         };
     });
@@ -52714,7 +52754,12 @@ System.register('OpenGroup/theme/components/group-list-item.js', [], function (_
 
     _export('default', function (wrapper) {
         return {
-            props: ['group']
+            props: ['group'],
+            methods: {
+                getFirstMenuItemPath: function getFirstMenuItemPath(path) {
+                    return wrapper.menuManager.getFirstMenuItemPath(path);
+                }
+            }
         };
     });
 
@@ -52763,7 +52808,15 @@ System.register("OpenGroup/theme/components/group.js", [], function (_export, _c
     "use strict";
 
     _export("default", function (wrapper) {
-        return {};
+        var currentGroup = wrapper.groupManager.getCurrentGroup();
+
+        return {
+            data: function data() {
+                return {
+                    currentGroup: currentGroup
+                };
+            }
+        };
     });
 
     return {
@@ -52777,9 +52830,7 @@ System.register("OpenGroup/theme/components/groups.js", [], function (_export, _
     "use strict";
 
     _export("default", function (wrapper) {
-        return {
-            template: "<sidebar class=\"region-sidebar\"></sidebar>"
-        };
+        return {};
     });
 
     return {
@@ -53637,7 +53688,7 @@ System.register('OpenGroup/theme/components/profile.js', ['jhuckaby/webcamjs'], 
                             inputType: "text",
                             model: "nickname",
                             id: "nick_name",
-                            placeholder: "What is your name?",
+                            label: "What is your name?",
                             required: true
                         }]
                     },
@@ -53749,7 +53800,7 @@ System.register("OpenGroup/theme/templates/add-group.html!npm:systemjs-plugin-te
 
       _export("__useDefault", __useDefault);
 
-      _export("default", "<div class=\"page add-group\">\n    <h1 class=\"page-title\">Add a group</h1>\n\n    <vue-form-generator tag=\"div\" :schema=\"schema\" :model=\"model\" :options=\"formOptions\">\n    </vue-form-generator>\n\n    <div class=\"form-actions\">\n        <div class=\"button primary\" @click=\"submitGroup\">Add group</div>\n        <router-link class=\"button secondary\" :to=\"{ path: '/groups' }\">Cancel</router-link>\n    </div>\n\n</div>");
+      _export("default", "<div class=\"page add-group\">\n    <h1 class=\"page-title\">Add a group</h1>\n\n    <vue-form-generator tag=\"div\" :schema=\"schema\" :model=\"model\" :options=\"formOptions\">\n    </vue-form-generator>\n\n    <div class=\"form-actions\">\n        <router-link class=\"button secondary\" :to=\"{ path: '/groups' }\"><span>Cancel</span><i class=\"fa fa-times\" aria-hidden=\"true\"></i></router-link>\n        <div class=\"button primary\" @click=\"submitGroup\"><span>Add group</span><i class=\"fa fa-caret-right\" aria-hidden=\"true\"></i></div>\n    </div>\n</div>");
     }
   };
 });
@@ -53765,7 +53816,7 @@ System.register("OpenGroup/theme/templates/group-header.html!npm:systemjs-plugin
 
       _export("__useDefault", __useDefault);
 
-      _export("default", "<div class=\"group-header\">\n    <h1 class=\"group-title\">{{ group.config.name }}</h1>\n    <nested-menu v-bind:items=\"menu\" class=\"group-menu\"></nested-menu>\n</div>");
+      _export("default", "<div class=\"group-header\" :class=\"{'show-menu': showMenu }\" v-if=\"group\">\n    <h1 class=\"group-title\"><router-link class=\"mobile-back-link\" :to=\"{ path: '/groups' }\"><i class=\"fa fa-chevron-left\" aria-hidden=\"true\"></i></router-link> {{ group.config.name }}</h1>\n\n    <div class=\"mobile-menu-toggle\" @click=\"toggleMenu\">\n        <div class=\"bar\"></div>\n        <div class=\"bar\"></div>\n        <div class=\"bar\"></div>\n        <div class=\"bar\"></div>\n        <div class=\"bar\"></div>\n    </div>\n\n    <nested-menu v-bind:items=\"menu\" class=\"group-menu\"><h1 class=\"menu-title\">Group menu</h1></nested-menu>\n</div>");
     }
   };
 });
@@ -53829,7 +53880,23 @@ System.register("OpenGroup/theme/templates/group.html!npm:systemjs-plugin-text@0
 
       _export("__useDefault", __useDefault);
 
-      _export("default", "<div>\n    <sidebar class=\"region-sidebar\"></sidebar>\n    <div class=\"region-main\">\n        <group-header class=\"region-main-header\"></group-header>\n        <router-view class=\"region-main-content\"></router-view>\n    </div>\n</div>");
+      _export("default", "<transition name=\"slide\">\n    <div class=\"region-main\">\n        <group-header class=\"region-main-header\"></group-header>\n        <router-view class=\"region-main-content\"></router-view>\n    </div>\n</transition>");
+    }
+  };
+});
+System.register("OpenGroup/theme/templates/groups.html!npm:systemjs-plugin-text@0.0.9/text.js", [], function (_export, _context) {
+  "use strict";
+
+  var __useDefault;
+
+  return {
+    setters: [],
+    execute: function () {
+      _export("__useDefault", __useDefault = true);
+
+      _export("__useDefault", __useDefault);
+
+      _export("default", "<transition name=\"fade\">\n<div>\n    <sidebar class=\"region-sidebar\"></sidebar>\n    <router-view class=\"region-main\"></router-view>\n</div>\n</transition>");
     }
   };
 });
@@ -53845,7 +53912,7 @@ System.register("OpenGroup/theme/templates/nested-menu.html!npm:systemjs-plugin-
 
       _export("__useDefault", __useDefault);
 
-      _export("default", "<div class=\"nested-menu\">\n    <ul class=\"menu-list\">\n        <li v-for=\"item in items\" class=\"menu-item\">\n            <router-link\n                    class=\"menu-link\"\n                    :to=\"{ path: item.path }\">{{ item.title }}</router-link>\n        </li>\n    </ul>\n\n    <nested-menu v-if=\"submenu.length\" v-bind:items=\"submenu\" class=\"sub-menu\"></nested-menu>\n</div>");
+      _export("default", "<div class=\"nested-menu\">\n    <slot></slot>\n\n    <ul class=\"menu-list\">\n        <li v-for=\"item in items\" class=\"menu-item\">\n            <router-link\n                    class=\"menu-link\"\n                    :to=\"{ path: item.path }\">{{ item.title }}</router-link>\n\n            <nested-menu v-if=\"item.children\" v-bind:items=\"item.children\" class=\"sub-menu\"></nested-menu>\n\n        </li>\n    </ul>\n\n</div>");
     }
   };
 });
@@ -53877,7 +53944,7 @@ System.register("OpenGroup/theme/templates/profile.html!npm:systemjs-plugin-text
 
       _export("__useDefault", __useDefault);
 
-      _export("default", "<div class=\"page profile\" :class=\"{'has-snapshot': model.snapshot}\">\n\n    <div class=\"camera-wrapper\">\n        <div class=\"camera-inner\">\n            <img class=\"snapshot\" v-if=\"model.snapshot\" :src=\"model.snapshot\"/>\n            <div id=\"camera\" class=\"camera\"></div>\n        </div>\n        <div class=\"snap\" @click=\"snap()\"></div>\n    </div>\n\n    <vue-form-generator tag=\"div\" :schema=\"schema\" :model=\"model\" :options=\"formOptions\">\n    </vue-form-generator>\n\n    <div class=\"button primary\" :class=\"{'disabled': !model.snapshot || !model.nickname }\" @click=\"saveProfile\">Continue</div>\n\n</div>");
+      _export("default", "<transition name=\"fade\">\n<div class=\"page profile\" :class=\"{'has-snapshot': model.snapshot}\">\n    <div class=\"camera-wrapper\">\n        <div class=\"camera-inner\">\n            <img class=\"snapshot\" v-if=\"model.snapshot\" :src=\"model.snapshot\"/>\n            <div id=\"camera\" class=\"camera\"></div>\n        </div>\n        <div class=\"snap\" @click=\"snap()\"></div>\n    </div>\n\n    <vue-form-generator tag=\"div\" :schema=\"schema\" :model=\"model\" :options=\"formOptions\">\n    </vue-form-generator>\n\n    <div class=\"form-actions\">\n        <div class=\"button primary\" :class=\"{'disabled': !model.snapshot || !model.nickname }\" @click=\"saveProfile\"><span>Continue</span><i class=\"fa fa-caret-right\" aria-hidden=\"true\"></i></div>\n    </div>\n</div>\n</transition>");
     }
   };
 });
@@ -53905,15 +53972,15 @@ System.register("OpenGroup/theme/templates/sidebar.html!npm:systemjs-plugin-text
 
       _export("__useDefault", __useDefault);
 
-      _export("default", "<div class=\"sidebar\">\n\n    <div class=\"sidebar-inner\">\n        <router-link class=\"logo-link\" :to=\"{ path: '/groups' }\">\n            <img class=\"logo\" src=\"/theme/images/logo.svg\">\n        </router-link>\n\n        <router-link :to=\"{ path: '/profile' }\" class=\"edit-profile-link\">\n            <div class=\"snapshot-wrapper\">\n                <img class=\"snapshot\" :src=\"profile.snapshot\"/>\n            </div>\n            <div class=\"texts\">\n                <h3 class=\"nickname\">{{ profile.nickname }}</h3>\n                <span class=\"edit-profile\"><i class=\"fa fa-pencil\" aria-hidden=\"true\"></i> Edit profile</span>\n            </div>\n        </router-link>\n\n        <router-link class=\"button secondary add-group small\" :to=\"{ path: '/add-group' }\"><i class=\"fa fa-plus\" aria-hidden=\"true\"></i> Add group</router-link>\n    </div>\n\n    <group-list></group-list>\n</div>");
+      _export("default", "<div class=\"sidebar\">\n    <div class=\"sidebar-inner\">\n        <router-link class=\"logo-link\" :to=\"{ path: '/groups' }\">\n            <img class=\"logo\" src=\"/theme/images/logo.svg\">\n        </router-link>\n\n        <div class=\"edit-profile-link\">\n            <div class=\"snapshot-wrapper\">\n                <img class=\"snapshot\" :src=\"profile.snapshot\"/>\n            </div>\n            <div class=\"texts\">\n                <h3 class=\"nickname\">{{ profile.nickname }}</h3>\n                <router-link :to=\"{ path: '/profile' }\" class=\"button secondary small\">Edit profile&nbsp;&nbsp;<i class=\"fa fa-pencil\" aria-hidden=\"true\"></i></router-link>\n            </div>\n        </div>\n\n        <router-link class=\"button primary add-group\" :to=\"{ path: '/add-group' }\"><span>Add group</span><i class=\"fa fa-plus\" aria-hidden=\"true\"></i></router-link>\n    </div>\n\n    <group-list></group-list>\n</div>\n");
     }
   };
 });
-System.register('OpenGroup/load.js', ['css', 'text', 'plugin-babel', 'OpenGroup/plugins/group/plugin.js', 'OpenGroup/plugins/multichat/components/multichat.js', 'OpenGroup/plugins/multichat/plugin.js', 'OpenGroup/plugins/multichat/templates/multichat.html!text', 'OpenGroup/plugins/multiconnect/plugin.js', 'OpenGroup/plugins/og-signaler/plugin.js', 'OpenGroup/plugins/webrtc/EasyWebRtc.js', 'OpenGroup/plugins/webrtc/EasyWebRtc.test.js', 'OpenGroup/plugins/webrtc/EasyWebRtcManualSignaler.js', 'OpenGroup/plugins/webrtc/OgWebRtc.js', 'OpenGroup/plugins/webrtc/plugin.js', 'OpenGroup/plugins/webrtc/webrtc.polyfill.js', 'OpenGroup/theme/components/about.js', 'OpenGroup/theme/components/add-group.js', 'OpenGroup/theme/components/group-header.js', 'OpenGroup/theme/components/group-list-item.js', 'OpenGroup/theme/components/group-list.js', 'OpenGroup/theme/components/group-settings.js', 'OpenGroup/theme/components/group.js', 'OpenGroup/theme/components/groups.js', 'OpenGroup/theme/components/nested-menu.js', 'OpenGroup/theme/components/profile-teaser.js', 'OpenGroup/theme/components/profile.js', 'OpenGroup/theme/components/sidebar.js', 'OpenGroup/theme/templates/about.html!text', 'OpenGroup/theme/templates/add-group.html!text', 'OpenGroup/theme/templates/group-header.html!text', 'OpenGroup/theme/templates/group-list-item.html!text', 'OpenGroup/theme/templates/group-list.html!text', 'OpenGroup/theme/templates/group-settings.html!text', 'OpenGroup/theme/templates/group.html!text', 'OpenGroup/theme/templates/nested-menu.html!text', 'OpenGroup/theme/templates/profile-teaser.html!text', 'OpenGroup/theme/templates/profile.html!text', 'OpenGroup/theme/templates/sidebar.html!text'], function (_export, _context) {
+System.register('OpenGroup/load.js', ['css', 'text', 'plugin-babel', 'OpenGroup/plugins/group/plugin.js', 'OpenGroup/plugins/multichat/components/multichat.js', 'OpenGroup/plugins/multichat/plugin.js', 'OpenGroup/plugins/multichat/templates/multichat.html!text', 'OpenGroup/plugins/multiconnect/plugin.js', 'OpenGroup/plugins/og-signaler/plugin.js', 'OpenGroup/plugins/webrtc/EasyWebRtc.js', 'OpenGroup/plugins/webrtc/EasyWebRtc.test.js', 'OpenGroup/plugins/webrtc/EasyWebRtcManualSignaler.js', 'OpenGroup/plugins/webrtc/OgWebRtc.js', 'OpenGroup/plugins/webrtc/plugin.js', 'OpenGroup/plugins/webrtc/webrtc.polyfill.js', 'OpenGroup/theme/components/about.js', 'OpenGroup/theme/components/add-group.js', 'OpenGroup/theme/components/group-header.js', 'OpenGroup/theme/components/group-list-item.js', 'OpenGroup/theme/components/group-list.js', 'OpenGroup/theme/components/group-settings.js', 'OpenGroup/theme/components/group.js', 'OpenGroup/theme/components/groups.js', 'OpenGroup/theme/components/nested-menu.js', 'OpenGroup/theme/components/profile-teaser.js', 'OpenGroup/theme/components/profile.js', 'OpenGroup/theme/components/sidebar.js', 'OpenGroup/theme/templates/about.html!text', 'OpenGroup/theme/templates/add-group.html!text', 'OpenGroup/theme/templates/group-header.html!text', 'OpenGroup/theme/templates/group-list-item.html!text', 'OpenGroup/theme/templates/group-list.html!text', 'OpenGroup/theme/templates/group-settings.html!text', 'OpenGroup/theme/templates/group.html!text', 'OpenGroup/theme/templates/groups.html!text', 'OpenGroup/theme/templates/nested-menu.html!text', 'OpenGroup/theme/templates/profile-teaser.html!text', 'OpenGroup/theme/templates/profile.html!text', 'OpenGroup/theme/templates/sidebar.html!text'], function (_export, _context) {
   "use strict";
 
   return {
-    setters: [function (_css) {}, function (_text) {}, function (_pluginBabel) {}, function (_OpenGroupPluginsGroupPluginJs) {}, function (_OpenGroupPluginsMultichatComponentsMultichatJs) {}, function (_OpenGroupPluginsMultichatPluginJs) {}, function (_OpenGroupPluginsMultichatTemplatesMultichatHtmlText) {}, function (_OpenGroupPluginsMulticonnectPluginJs) {}, function (_OpenGroupPluginsOgSignalerPluginJs) {}, function (_OpenGroupPluginsWebrtcEasyWebRtcJs) {}, function (_OpenGroupPluginsWebrtcEasyWebRtcTestJs) {}, function (_OpenGroupPluginsWebrtcEasyWebRtcManualSignalerJs) {}, function (_OpenGroupPluginsWebrtcOgWebRtcJs) {}, function (_OpenGroupPluginsWebrtcPluginJs) {}, function (_OpenGroupPluginsWebrtcWebrtcPolyfillJs) {}, function (_OpenGroupThemeComponentsAboutJs) {}, function (_OpenGroupThemeComponentsAddGroupJs) {}, function (_OpenGroupThemeComponentsGroupHeaderJs) {}, function (_OpenGroupThemeComponentsGroupListItemJs) {}, function (_OpenGroupThemeComponentsGroupListJs) {}, function (_OpenGroupThemeComponentsGroupSettingsJs) {}, function (_OpenGroupThemeComponentsGroupJs) {}, function (_OpenGroupThemeComponentsGroupsJs) {}, function (_OpenGroupThemeComponentsNestedMenuJs) {}, function (_OpenGroupThemeComponentsProfileTeaserJs) {}, function (_OpenGroupThemeComponentsProfileJs) {}, function (_OpenGroupThemeComponentsSidebarJs) {}, function (_OpenGroupThemeTemplatesAboutHtmlText) {}, function (_OpenGroupThemeTemplatesAddGroupHtmlText) {}, function (_OpenGroupThemeTemplatesGroupHeaderHtmlText) {}, function (_OpenGroupThemeTemplatesGroupListItemHtmlText) {}, function (_OpenGroupThemeTemplatesGroupListHtmlText) {}, function (_OpenGroupThemeTemplatesGroupSettingsHtmlText) {}, function (_OpenGroupThemeTemplatesGroupHtmlText) {}, function (_OpenGroupThemeTemplatesNestedMenuHtmlText) {}, function (_OpenGroupThemeTemplatesProfileTeaserHtmlText) {}, function (_OpenGroupThemeTemplatesProfileHtmlText) {}, function (_OpenGroupThemeTemplatesSidebarHtmlText) {}],
+    setters: [function (_css) {}, function (_text) {}, function (_pluginBabel) {}, function (_OpenGroupPluginsGroupPluginJs) {}, function (_OpenGroupPluginsMultichatComponentsMultichatJs) {}, function (_OpenGroupPluginsMultichatPluginJs) {}, function (_OpenGroupPluginsMultichatTemplatesMultichatHtmlText) {}, function (_OpenGroupPluginsMulticonnectPluginJs) {}, function (_OpenGroupPluginsOgSignalerPluginJs) {}, function (_OpenGroupPluginsWebrtcEasyWebRtcJs) {}, function (_OpenGroupPluginsWebrtcEasyWebRtcTestJs) {}, function (_OpenGroupPluginsWebrtcEasyWebRtcManualSignalerJs) {}, function (_OpenGroupPluginsWebrtcOgWebRtcJs) {}, function (_OpenGroupPluginsWebrtcPluginJs) {}, function (_OpenGroupPluginsWebrtcWebrtcPolyfillJs) {}, function (_OpenGroupThemeComponentsAboutJs) {}, function (_OpenGroupThemeComponentsAddGroupJs) {}, function (_OpenGroupThemeComponentsGroupHeaderJs) {}, function (_OpenGroupThemeComponentsGroupListItemJs) {}, function (_OpenGroupThemeComponentsGroupListJs) {}, function (_OpenGroupThemeComponentsGroupSettingsJs) {}, function (_OpenGroupThemeComponentsGroupJs) {}, function (_OpenGroupThemeComponentsGroupsJs) {}, function (_OpenGroupThemeComponentsNestedMenuJs) {}, function (_OpenGroupThemeComponentsProfileTeaserJs) {}, function (_OpenGroupThemeComponentsProfileJs) {}, function (_OpenGroupThemeComponentsSidebarJs) {}, function (_OpenGroupThemeTemplatesAboutHtmlText) {}, function (_OpenGroupThemeTemplatesAddGroupHtmlText) {}, function (_OpenGroupThemeTemplatesGroupHeaderHtmlText) {}, function (_OpenGroupThemeTemplatesGroupListItemHtmlText) {}, function (_OpenGroupThemeTemplatesGroupListHtmlText) {}, function (_OpenGroupThemeTemplatesGroupSettingsHtmlText) {}, function (_OpenGroupThemeTemplatesGroupHtmlText) {}, function (_OpenGroupThemeTemplatesGroupsHtmlText) {}, function (_OpenGroupThemeTemplatesNestedMenuHtmlText) {}, function (_OpenGroupThemeTemplatesProfileTeaserHtmlText) {}, function (_OpenGroupThemeTemplatesProfileHtmlText) {}, function (_OpenGroupThemeTemplatesSidebarHtmlText) {}],
     execute: function () {}
   };
 });
