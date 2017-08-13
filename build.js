@@ -52845,9 +52845,17 @@ System.register('OpenGroup/theme/components/nested-menu.js', [], function (_expo
 
     _export('default', function (wrapper) {
         return {
+            mounted: function mounted() {
+                var _this = this;
+
+                window.addEventListener('resize', function () {
+                    _this.mobile = window.innerWidth < 961;
+                });
+            },
             props: ['items'],
             data: function data() {
                 return {
+                    mobile: window.innerWidth < 961,
                     submenu: wrapper.menuManager.getSubMenu(this)
                 };
             },
@@ -53800,7 +53808,7 @@ System.register("OpenGroup/theme/templates/add-group.html!npm:systemjs-plugin-te
 
       _export("__useDefault", __useDefault);
 
-      _export("default", "<div class=\"page add-group\">\n    <h1 class=\"page-title\">Add a group</h1>\n\n    <vue-form-generator tag=\"div\" :schema=\"schema\" :model=\"model\" :options=\"formOptions\">\n    </vue-form-generator>\n\n    <div class=\"form-actions\">\n        <router-link class=\"button secondary\" :to=\"{ path: '/groups' }\"><span>Cancel</span><i class=\"fa fa-times\" aria-hidden=\"true\"></i></router-link>\n        <div class=\"button primary\" @click=\"submitGroup\"><span>Add group</span><i class=\"fa fa-caret-right\" aria-hidden=\"true\"></i></div>\n    </div>\n</div>");
+      _export("default", "<div class=\"flex-wrapper\">\n    <div class=\"page add-group\">\n        <h1 class=\"page-title\">Add a group</h1>\n\n        <vue-form-generator tag=\"div\" :schema=\"schema\" :model=\"model\" :options=\"formOptions\">\n        </vue-form-generator>\n\n        <div class=\"form-actions\">\n            <router-link class=\"button secondary\" :to=\"{ path: '/groups' }\"><span>Cancel</span><i class=\"fa fa-times\" aria-hidden=\"true\"></i></router-link>\n            <div class=\"button primary\" @click=\"submitGroup\"><span>Add group</span><i class=\"fa fa-caret-right\" aria-hidden=\"true\"></i></div>\n        </div>\n    </div>\n</div>");
     }
   };
 });
@@ -53912,7 +53920,7 @@ System.register("OpenGroup/theme/templates/nested-menu.html!npm:systemjs-plugin-
 
       _export("__useDefault", __useDefault);
 
-      _export("default", "<div class=\"nested-menu\">\n    <slot></slot>\n\n    <ul class=\"menu-list\">\n        <li v-for=\"item in items\" class=\"menu-item\">\n            <router-link\n                    class=\"menu-link\"\n                    :to=\"{ path: item.path }\">{{ item.title }}</router-link>\n\n            <nested-menu v-if=\"item.children\" v-bind:items=\"item.children\" class=\"sub-menu\"></nested-menu>\n\n        </li>\n    </ul>\n\n</div>");
+      _export("default", "<div class=\"nested-menu\">\n    <slot></slot>\n\n    <ul class=\"menu-list\">\n        <li v-for=\"item in items\" class=\"menu-item\">\n            <router-link\n                    class=\"menu-link\"\n                    :to=\"{ path: item.path }\">{{ item.title }}</router-link>\n\n            <nested-menu v-if=\"item.children && mobile\" v-bind:items=\"item.children\" class=\"sub-menu\"></nested-menu>\n\n        </li>\n    </ul>\n\n    <nested-menu v-if=\"submenu.length && !mobile\" v-bind:items=\"submenu\" class=\"sub-menu\"></nested-menu>\n</div>");
     }
   };
 });
@@ -53944,7 +53952,7 @@ System.register("OpenGroup/theme/templates/profile.html!npm:systemjs-plugin-text
 
       _export("__useDefault", __useDefault);
 
-      _export("default", "<transition name=\"fade\">\n<div class=\"page profile\" :class=\"{'has-snapshot': model.snapshot}\">\n    <div class=\"camera-wrapper\">\n        <div class=\"camera-inner\">\n            <img class=\"snapshot\" v-if=\"model.snapshot\" :src=\"model.snapshot\"/>\n            <div id=\"camera\" class=\"camera\"></div>\n        </div>\n        <div class=\"snap\" @click=\"snap()\"></div>\n    </div>\n\n    <vue-form-generator tag=\"div\" :schema=\"schema\" :model=\"model\" :options=\"formOptions\">\n    </vue-form-generator>\n\n    <div class=\"form-actions\">\n        <div class=\"button primary\" :class=\"{'disabled': !model.snapshot || !model.nickname }\" @click=\"saveProfile\"><span>Continue</span><i class=\"fa fa-caret-right\" aria-hidden=\"true\"></i></div>\n    </div>\n</div>\n</transition>");
+      _export("default", "<transition name=\"fade\">\n    <div class=\"flex-wrapper\">\n        <div class=\"page profile\" :class=\"{'has-snapshot': model.snapshot}\">\n            <div class=\"camera-wrapper\">\n                <div class=\"camera-inner\">\n                    <img class=\"snapshot\" v-if=\"model.snapshot\" :src=\"model.snapshot\"/>\n                    <div id=\"camera\" class=\"camera\"></div>\n                </div>\n                <div class=\"snap\" @click=\"snap()\"></div>\n            </div>\n\n            <vue-form-generator tag=\"div\" :schema=\"schema\" :model=\"model\" :options=\"formOptions\">\n            </vue-form-generator>\n\n            <div class=\"form-actions\">\n                <div class=\"button primary\" :class=\"{'disabled': !model.snapshot || !model.nickname }\" @click=\"saveProfile\"><span>Continue</span><i class=\"fa fa-caret-right\" aria-hidden=\"true\"></i></div>\n            </div>\n        </div>\n    </div>\n</transition>");
     }
   };
 });
