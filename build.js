@@ -38800,11 +38800,11 @@ System.register('OpenGroup/plugins/multichat/components/multichat.js', ['moment'
             data: function data() {
                 var _this = this;
 
-                if (!this.messages) {
-                    this.messages = [];
-                }
-
                 var currentGroup = wrapper.groupManager.getCurrentGroup();
+
+                if (!this.messages) {
+                    this.messages = currentGroup.plugins['multichat'].messages;
+                }
 
                 currentGroup.on('og.core.multichat.message', function (object, connection) {
                     var message = object.message;
@@ -50116,6 +50116,7 @@ System.register('OpenGroup/plugins/multichat/plugin.js', ['npm:systemjs-plugin-b
                     _this.description = 'Lorem ipsum';
                     _this.name = 'multichat';
                     _this.config = {};
+                    _this.messages = [];
                     _this.componentNames = ['multichat'];
 
                     _this.group = group;
