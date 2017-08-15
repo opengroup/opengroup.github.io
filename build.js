@@ -5577,15 +5577,23 @@ System.register('OpenGroup/core/managers/RouteManager.js', ['npm:systemjs-plugin
                                         watch: {
                                             // This is needed else the whole form get's 'cached'.
                                             '$route': function $route() {
+                                                var _this3 = this;
+
+                                                var currentGroup = wrapper.groupManager.getCurrentGroup();
+                                                var currentMenuItem = currentGroup.menuItems.filter(function (menuItem) {
+                                                    return menuItem.subPath === 'settings/' + _this3.$route.params.plugin;
+                                                })[0];
+                                                this.componentName = currentMenuItem ? currentMenuItem.component : '';
+
                                                 Object.assign(this, routeManager.createSettingsRoute(this));
                                             }
                                         },
                                         data: function data() {
-                                            var _this3 = this;
+                                            var _this4 = this;
 
                                             var currentGroup = wrapper.groupManager.getCurrentGroup();
                                             var currentMenuItem = currentGroup.menuItems.filter(function (menuItem) {
-                                                return menuItem.subPath === 'settings/' + _this3.$route.params.plugin;
+                                                return menuItem.subPath === 'settings/' + _this4.$route.params.plugin;
                                             })[0];
 
                                             return _extends({}, routeManager.createSettingsRoute(this), {
