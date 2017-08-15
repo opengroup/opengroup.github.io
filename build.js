@@ -5119,7 +5119,7 @@ System.register('OpenGroup/core/managers/GroupManager.js', ['npm:systemjs-plugin
                     value: function addGroup(groupManifest) {
                         var _this2 = this;
 
-                        if (this.validGroupManifest(groupManifest)) {
+                        if (this.validGroupManifest(groupManifest) && !this.getGroupBySlug(groupManifest.slug)) {
                             var _ret = function () {
                                 var newGroup = new OpenGroup(_this2.wrapper, groupManifest);
                                 _this2.groups.push(newGroup);
@@ -5153,8 +5153,6 @@ System.register('OpenGroup/core/managers/GroupManager.js', ['npm:systemjs-plugin
                             }();
 
                             if (typeof _ret === "object") return _ret.v;
-                        } else {
-                            throw 'The group manifest is invalid';
                         }
                     }
                 }, {
