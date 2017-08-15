@@ -58574,42 +58574,77 @@ System.register('OpenGroup/theme/components/profile.js', ['jhuckaby/webcamjs'], 
     var Webcam;
 
     _export('default', function (wrapper) {
+        var hasChecked = false;
+
         var profile = wrapper.profileManager.getProfile();
+
+        var _data = {
+            mode: 'landscape',
+            model: profile,
+            schema: {
+                fields: [{
+                    type: "input",
+                    inputType: "text",
+                    model: "nickname",
+                    id: "nick_name",
+                    label: "What is your name?",
+                    required: true
+                }]
+            },
+
+            formOptions: {
+                validateAfterLoad: true,
+                validateAfterChanged: true
+            }
+        };
+
+        var startWebcam = function startWebcam() {
+            Webcam.attach('#camera');
+            Webcam.on('live', function () {
+                if (!hasChecked) {
+                    var video = document.querySelector('video');
+                    if (video.videoHeight > video.videoWidth) {
+                        _data.mode = 'portrait';
+
+                        Webcam.set({
+                            width: 240,
+                            height: 320,
+                            dest_width: 240,
+                            dest_height: 320,
+                            crop_width: 240,
+                            crop_height: 240,
+                            image_format: 'jpeg',
+                            jpeg_quality: 90
+                        });
+                    }
+                }
+
+                profile.snapshot = false;
+                Webcam.off('live');
+                hasChecked = true;
+            });
+        };
 
         return {
             mounted: function mounted() {
                 Webcam.set({
                     width: 320,
                     height: 240,
+                    dest_width: 320,
+                    dest_height: 240,
+                    crop_width: 240,
+                    crop_height: 240,
                     image_format: 'jpeg',
-                    jpeg_quality: 70
+                    jpeg_quality: 90
                 });
 
                 if (!this.model.snapshot) {
-                    Webcam.attach('#camera');
+                    startWebcam();
                 }
             },
 
             data: function data() {
-
-                return {
-                    model: profile,
-                    schema: {
-                        fields: [{
-                            type: "input",
-                            inputType: "text",
-                            model: "nickname",
-                            id: "nick_name",
-                            label: "What is your name?",
-                            required: true
-                        }]
-                    },
-
-                    formOptions: {
-                        validateAfterLoad: true,
-                        validateAfterChanged: true
-                    }
-                };
+                return _data;
             },
             methods: {
                 saveProfile: function saveProfile() {
@@ -58627,11 +58662,7 @@ System.register('OpenGroup/theme/components/profile.js', ['jhuckaby/webcamjs'], 
                             Webcam.reset();
                         });
                     } else {
-                        Webcam.attach('#camera');
-                        Webcam.on('live', function () {
-                            _this.model.snapshot = false;
-                            Webcam.off('live');
-                        });
+                        startWebcam();
                     }
                 }
             }
@@ -58856,7 +58887,7 @@ System.register("OpenGroup/theme/templates/profile.html!npm:systemjs-plugin-text
 
       _export("__useDefault", __useDefault);
 
-      _export("default", "<transition name=\"fade\">\n    <div class=\"flex-wrapper\">\n        <div class=\"page profile\" :class=\"{'has-snapshot': model.snapshot}\">\n            <div class=\"camera-wrapper\">\n                <div class=\"camera-inner\">\n                    <img class=\"snapshot\" v-if=\"model.snapshot\" :src=\"model.snapshot\"/>\n                    <div id=\"camera\" class=\"camera\"></div>\n                </div>\n                <div class=\"snap\" @click=\"snap()\"></div>\n            </div>\n\n            <vue-form-generator tag=\"div\" :schema=\"schema\" :model=\"model\" :options=\"formOptions\">\n            </vue-form-generator>\n\n            <div class=\"form-actions\">\n                <div class=\"button primary\" :class=\"{'disabled': !model.snapshot || !model.nickname }\" @click=\"saveProfile\"><span>Continue</span><i class=\"fa fa-caret-right\" aria-hidden=\"true\"></i></div>\n            </div>\n        </div>\n    </div>\n</transition>");
+      _export("default", "<transition name=\"fade\">\n    <div class=\"flex-wrapper\">\n        <div class=\"page profile\" :class=\"[{'has-snapshot': model.snapshot}, mode]\">\n            <div class=\"camera-wrapper\">\n                <div class=\"camera-inner\">\n                    <img class=\"snapshot\" v-if=\"model.snapshot\" :src=\"model.snapshot\"/>\n                    <div id=\"camera\" class=\"camera\"></div>\n                </div>\n                <div class=\"snap\" @click=\"snap()\"></div>\n            </div>\n\n            <vue-form-generator tag=\"div\" :schema=\"schema\" :model=\"model\" :options=\"formOptions\">\n            </vue-form-generator>\n\n            <div class=\"form-actions\">\n                <div class=\"button primary\" :class=\"{'disabled': !model.snapshot || !model.nickname }\" @click=\"saveProfile\"><span>Continue</span><i class=\"fa fa-caret-right\" aria-hidden=\"true\"></i></div>\n            </div>\n        </div>\n    </div>\n</transition>");
     }
   };
 });
