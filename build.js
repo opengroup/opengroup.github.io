@@ -50541,8 +50541,15 @@ System.register('OpenGroup/plugins/webrtc/EasyWebRtc.js', ['npm:systemjs-plugin-
                     var _this = _possibleConstructorReturn(this, (EasyWebRtc.__proto__ || Object.getPrototypeOf(EasyWebRtc)).call(this));
 
                     _this.config = {
-                        'iceServers': [{ 'urls': 'stun:23.21.150.121' }]
+                        'iceServers': [{
+                            urls: 'turn:connect.opengroup.io',
+                            username: 'lorem',
+                            credential: 'ipsum'
+                        }, {
+                            urls: ['stun:connect.opengroup.io']
+                        }]
                     };
+
                     _this.constraints = {};
 
                     Object.assign(_this.config, config);
@@ -50673,7 +50680,9 @@ System.register('OpenGroup/plugins/webrtc/EasyWebRtc.js', ['npm:systemjs-plugin-
                 }, {
                     key: 'onIceCandidate',
                     value: function onIceCandidate(event) {
-                        this.easyWebRtc.emit('sdpComplete', this.localDescription);
+                        if (event.candidate) {
+                            this.easyWebRtc.emit('sdpComplete', this.localDescription);
+                        }
                     }
 
                     /**
