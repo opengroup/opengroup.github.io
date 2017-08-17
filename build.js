@@ -57571,7 +57571,6 @@ System.register('OpenGroup/theme/components/add-group.js', ['underscore', 'OpenG
                 'multichat': {},
                 'group': {},
                 'multiconnect': {},
-                'qr-signaler': {},
                 'text-signaler': {}
             }
         });
