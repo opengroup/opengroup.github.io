@@ -5107,13 +5107,11 @@ System.register('OpenGroup/core/managers/GroupManager.js', ['npm:systemjs-plugin
 
                     _this.wrapper = wrapper;
 
-                    _this.wrapper.on('preReady', function () {
-                        _this.wrapper.storageManager.on('defineStores', function (stores) {
-                            if (!stores[1]) {
-                                stores[1] = {};
-                            }
-                            stores[1].groups = 'name, uuid, slug, *plugins';
-                        });
+                    _this.wrapper.on('bootstrap', function () {
+                        // this.wrapper.storageManager.on('defineStores', (stores) => {
+                        //     if (!stores[1]) { stores[1] = {} }
+                        //     stores[1].groups = 'name, uuid, slug, *plugins';
+                        // });
                     });
 
                     _this.wrapper.on('ready', function () {
@@ -5723,18 +5721,16 @@ System.register('OpenGroup/core/managers/ProfileManager.js', ['npm:systemjs-plug
 
                     _this.wrapper = wrapper;
 
-                    _this.wrapper.on('preReady', function () {
-                        _this.wrapper.storageManager.on('defineStores', function (stores) {
-                            if (!stores[1]) {
-                                stores[1] = {};
-                            }
-                            stores[1].profiles = '&uuid, nickname, snapshot';
-                        });
-
-                        // this.storage = this.wrapper.storageManager.getStore('profiles');
+                    _this.wrapper.on('bootstrap', function () {
+                        // this.wrapper.storageManager.on('defineStores', (stores) => {
+                        //     if (!stores[1]) { stores[1] = {} }
+                        //     stores[1].profiles = '&uuid, nickname, snapshot';
+                        // });
                     });
 
                     _this.wrapper.on('ready', function () {
+                        // this.storage = this.wrapper.storageManager.getStore('profiles');
+
                         var profile = _this.getProfile();
 
                         if (!profile.snapshot || !profile.nickname) {
@@ -10206,7 +10202,7 @@ System.register('OpenGroup/core/managers/StorageManager.js', ['npm:systemjs-plug
                     _this.db = new Dexie('opengroup');
                     var storesData = { 1: {} };
 
-                    _this.wrapper.on('ready', function () {
+                    _this.wrapper.on('preReady', function () {
                         _this.emit('defineStores', storesData);
                         _(storesData).each(function (version, stores) {
                             _this.db.version(version).stores(stores);
@@ -10306,6 +10302,9 @@ System.register('OpenGroup/core/Wrapper.js', ['npm:systemjs-plugin-babel@0.0.17/
                 _createClass(Wrapper, [{
                     key: 'startVue',
                     value: function startVue() {
+                        this.state = 'bootstrap';
+                        this.emit('bootstrap');
+
                         Vue.use(VueFormGenerator);
                         Vue.use(VueRouter);
 
@@ -63102,7 +63101,7 @@ System.register('OpenGroup/theme/components/profile.js', ['jhuckaby/webcamjs'], 
                             crop_width: 240,
                             crop_height: 240,
                             image_format: 'jpeg',
-                            jpeg_quality: 90
+                            jpeg_quality: 30
                         });
                     }
                 }
@@ -63123,7 +63122,7 @@ System.register('OpenGroup/theme/components/profile.js', ['jhuckaby/webcamjs'], 
                     crop_width: 240,
                     crop_height: 240,
                     image_format: 'jpeg',
-                    jpeg_quality: 90
+                    jpeg_quality: 30
                 });
 
                 if (!this.model.snapshot) {
